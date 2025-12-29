@@ -23,6 +23,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -31,6 +33,54 @@ public class SingleBatchConfig {
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
     private final EntityManagerFactory entityManagerFactory;
+
+    private static final Pattern MIN_PATTERN  = Pattern.compile("(\\d+)\\s*분");
+    private static final Pattern HOUR_PATTERN = Pattern.compile("(\\d+)\\s*시간");
+
+
+    private String normalizeCookTimeToMinutes(String raw) {
+        if (raw == null) return null;
+
+        String s = raw.trim().replaceAll("\\s+", "");
+        if (s.isEmpty()) return null;
+
+        boolean isGte = s.contains("이상"); // "2시간이상" -> 120분이상
+        String core = s.replace("이내", "").replace("이상", "");
+
+        Integer minutes = parseToMinutes(core);
+        if (minutes == null) {
+            return raw.trim();
+        }
+
+        if (isGte) {
+            // 2시간이상 -> 120분이상
+            return minutes + "분이상";
+        }
+        // 2시간이내 -> 120분, 30분이내 -> 30분
+        return minutes + "분";
+    }
+
+    private Integer parseToMinutes(String s) {
+        // "2시간" -> 120
+        Matcher hm = HOUR_PATTERN.matcher(s);
+        if (hm.matches()) {
+            int h = Integer.parseInt(hm.group(1));
+            return h * 60;
+        }
+
+        // "90분" -> 90
+        Matcher mm = MIN_PATTERN.matcher(s);
+        if (mm.matches()) {
+            return Integer.parseInt(mm.group(1));
+        }
+
+        // 혹시 "120" 같이 숫자만 들어오는 경우를 분으로 간주(원치 않으면 제거)
+        if (s.matches("\\d+")) {
+            return Integer.parseInt(s);
+        }
+
+        return null;
+    }
 
     @Bean
     public Job recipeDataMigrationJob() {
@@ -108,7 +158,8 @@ public class SingleBatchConfig {
 
             recipe.setCkgInbunNm(item[14]);
             recipe.setCkgDodfNm(item[15]);
-            recipe.setCkgTimeNm(item[16]);
+//            recipe.setCkgTimeNm(item[16]);
+            recipe.setCkgTimeNm(normalizeCookTimeToMinutes(item[16]));
 
             if (item[17] != null && !item[17].isEmpty()) {
                 try {

@@ -67,4 +67,9 @@ public class Recipe {
     public void likeToCountDown() {
         if(rcmmCnt > 0)  rcmmCnt--;
     }
+
+    public void viewCountUp() {
+        if (inqCnt == null) inqCnt = 0;
+        inqCnt++;
+    }
 }

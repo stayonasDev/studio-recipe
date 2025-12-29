@@ -7,37 +7,46 @@ import com.recipe.domain.dto.SortBy;
 import com.recipe.domain.dto.auth.CustomerDetails;
 import com.recipe.service.RecipeService;
 import com.recipe.service.AuthService;
+import com.recipe.service.RecommendationService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 @Log4j2
-public class RecipeControllerImpl implements RecipeController {
+class RecipeControllerImpl implements RecipeController {
 
     private final RecipeService recipeService;
     private final AuthService authService;
+    private final RecommendationService recommendationService;
+
 
     @GetMapping("/recommend-recipes")
-    public ResponseEntity<Void> recommendRecipes() {
-        return ResponseEntity.ok().build();
-    }
+    public ResponseEntity<List<RecipeResponseDTO>> recommendRecipes(
+            @RequestParam(defaultValue = "10") int k,
+            @RequestParam(defaultValue = "0.8") double lambda,
+            @RequestParam(required = false) Long seedRecipeId,
+            @AuthenticationPrincipal CustomerDetails customer
+    ) {
+        if (customer == null) return ResponseEntity.status(401).build();
 
-    @GetMapping("/recipes/{recipeId}")
-    public ResponseEntity<RecipeResponseDTO> detailsRecipe(@PathVariable("recipeId") Long recipeId,
-                                              @AuthenticationPrincipal CustomerDetails customer) {
         Long userId = customer.getUserId();
-        log.info("UserId: {}", userId);
-        RecipeResponseDTO recipe = recipeService.findOneRecipe(recipeId, userId);
+        List<RecipeResponseDTO> result =
+                recommendationService.recommendForUser(userId, k, lambda, seedRecipeId);
 
-        return ResponseEntity.ok(recipe);
+        return ResponseEntity.ok(result);
     }
+
+
 
     @GetMapping("/main-pages")
     public ResponseEntity<Page<RecipeResponseDTO>> mainPage(
@@ -59,12 +68,13 @@ public class RecipeControllerImpl implements RecipeController {
         return ResponseEntity.ok(recipePage);
     }
 
-    @Operation(
-            summary = "사용자 레시피 사용",
-            description = "사용된 레시피를 사용 기록에 저장합니다."
-    )
-    @PostMapping("/details")
-    public ResponseEntity<Void> recipeCompletion(/*@RequestBody*/) {
-        return ResponseEntity.ok().build();
+    @GetMapping("recipes/{recipeId}")
+    public ResponseEntity<RecipeResponseDTO> detailRecipe(
+            @PathVariable("recipeId") Long recipeId,
+            @AuthenticationPrincipal CustomerDetails customer){
+
+        Long userId = customer.getUserId();
+        RecipeResponseDTO recipe = recipeService.findOneRecipe(recipeId, userId);
+        return ResponseEntity.ok(recipe);
     }
 }

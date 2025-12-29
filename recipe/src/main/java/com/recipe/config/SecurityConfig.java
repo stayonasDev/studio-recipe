@@ -32,8 +32,8 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
-    @Value("${front.url}")
-    private String frontUrl;
+//    @Value("${front.url}")
+    private String frontUrl = "http://localhost:5173";
 //     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 //     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
@@ -81,7 +81,9 @@ public class SecurityConfig {
                                         "/v3/api-docs/**",
                                         "/v3/api-docs",
                                         "/error",
-                                        "/test/**"
+                                        "/test/**",
+                                        // admin은 ROLE 설정 필요
+                                        "/admin/**"
                                 ).permitAll() // 위의 경로들은 인증 없이 접근 허용
 
                                 // 나머지 모든 요청은 인증된 사용자만 허용

@@ -4,9 +4,7 @@ import com.recipe.domain.entity.Recipe;
 import com.recipe.domain.entity.User;
 import com.recipe.domain.entity.UserReferences;
 import com.recipe.domain.entity.enums.PreferenceType;
-import com.recipe.exceptions.user.UserExceptions;
 import com.recipe.repository.UserReferencesRepository;
-import com.recipe.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -23,44 +21,68 @@ public class UserReferencesService {
     private final UserService userService;
 
     @Transactional
-    public void userRecipeView(Recipe recipe, Long userId) {
-        User findUser = userService.findByUser(userId);
+    public void upsertPreference(Recipe recipe, Long userId, PreferenceType newType) {
+        User user = userService.findByUser(userId);
 
-        Optional<UserReferences> findRef =
-                referenceRepository.findByUser_UserIdAndRecipe_RcpSno(userId, recipe.getRcpSno());
+        UserReferences ref = referenceRepository
+                .findByUserAndRecipe(user, recipe)
+                .orElseGet(() -> UserReferences.builder()
+                        .user(user)
+                        .recipe(recipe)
+                        .preference(PreferenceType.VIEW) // 초기값은 VIEW로
+                        .build()
+                );
 
-        if(findRef.isPresent()) {
-            //VIEW라면 날짜 업데이트 or LIKE라면 X(LIKE가 더 높은 레벨이라 생각하여 바꾸지 않는다.)
-            if(findRef.get().getPreference() ==  PreferenceType.VIEW) {
-                //Modified는 JpaAuditing이 있지만, DirtyChecking에 해당되지 않아 직접 바꿨습니다.
-                findRef.get().updateModifiedDate();
+        PreferenceType current = ref.getPreference();
+
+        // 1) VIEW가 들어오면:
+        //    현재 VIEW면 (조회 갱신)
+        //    현재 LIKE면 유지
+        //    현재 UNLIKE면 VIEW로
+        // 2) LIKE가 들어오면 LIKE로
+        // 3) UNLIKE가 들어오면 UNLIKE로 변경
+        switch (newType) {
+            case VIEW -> {
+                if (current == PreferenceType.VIEW) {
+                    ref.updateModifiedDate();
+                } else if (current == PreferenceType.UNLIKE) {
+                    ref.changePreference(PreferenceType.VIEW);
+                }
             }
-        }else{
-            UserReferences references = UserReferences.builder()
-                    .user(findUser)
-                    .recipe(recipe)
-                    .preference(PreferenceType.VIEW)
-                    .build();
-            log.info("세이브 됨!!!!!!!!!!");
-            referenceRepository.save(references);
+            case LIKE -> {
+                if (current != PreferenceType.LIKE) {
+                    ref.changePreference(PreferenceType.LIKE);
+                } else {
+                    ref.updateModifiedDate();
+                }
+            }
+            case UNLIKE -> {
+                if (current != PreferenceType.UNLIKE) {
+                    ref.changePreference(PreferenceType.UNLIKE);
+                } else {
+                    ref.updateModifiedDate();
+                }
+            }
         }
+
+        referenceRepository.save(ref);
     }
 
-    // Like 좋아요는 중복으로 눌리지 않고 true, false로 구분 되기 때문에 update가 필요 없음
-    // 또한 LikeService에서 좋아요를 눌렀는지 검증하기에 검증 로직 따로 필요X
+    @Transactional
+    public void userRecipeView(Recipe recipe, Long userId) {
+        upsertPreference(recipe, userId, PreferenceType.VIEW);
+    }
+
     @Transactional
     public void userLikeToRecipe(Recipe recipe, User user) {
-            UserReferences references = UserReferences.builder()
-                    .user(user)
-                    .recipe(recipe)
-                    .preference(PreferenceType.LIKE)
-                    .build();
-            referenceRepository.save(references);
-    } //리팩터링 고려 사항(View, Like Enum 타입을 넘겨주고 Enum Type를 가지고 판단 즉 두 개의 로직을 하나로
+        upsertPreference(recipe, user.getUserId(), PreferenceType.LIKE);
+    }
 
+    /*
+    - 좋아요 취소 시 삭제 시키지 않고 UNLIKE로 남김
+     */
+    @Transactional
     public void deleteByReference(Recipe recipe, User user) {
-        Optional<UserReferences> userReferences =
-                referenceRepository.findByUserAndRecipeAndPreference(user, recipe, PreferenceType.LIKE);
-        userReferences.ifPresent(referenceRepository::delete);
+        upsertPreference(recipe, user.getUserId(), PreferenceType.UNLIKE);
     }
 }

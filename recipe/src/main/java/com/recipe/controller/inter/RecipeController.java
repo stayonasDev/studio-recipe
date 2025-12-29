@@ -11,12 +11,6 @@ import org.springframework.http.ResponseEntity;
 @Tag(name = "레시피", description = "레시피에 대한 API 명세서")
 public interface RecipeController {
 
-    @Operation(summary = "레시피 상세 페이지", description = "레시피 상세 페이지 반환",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "조회 성공"),
-                    @ApiResponse(responseCode = "404", description = "레시피 Not Found")
-            })
-    public ResponseEntity<RecipeResponseDTO> detailsRecipe(Long recipeId, CustomerDetails customer);
 
     @Operation(summary = "메인 페이지",
             description = "전체 레시피 조건에 따라 페이지 반환",

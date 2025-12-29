@@ -12,7 +12,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "USER_REFERENCE")
+@Table(name = "USER_REFERENCES")
 @Builder
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 @ToString
 public class UserReferences extends BaseEntityTime{
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PREFERENCE_ID")
     private Long preferenceId;
 
@@ -37,7 +37,7 @@ public class UserReferences extends BaseEntityTime{
 // VIEW, SAVE, SHARE, SEARCH 고려
 @Enumerated(EnumType.STRING)
 @Column(name = "PREFERENCE_TYPE", nullable = false,
-        columnDefinition = "ENUM ('VIEW', 'LIKE')")
+        columnDefinition = "ENUM ('VIEW', 'LIKE', 'UNLIKE')")
 private PreferenceType preference;
 
 //RATING

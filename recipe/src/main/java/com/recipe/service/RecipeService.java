@@ -38,12 +38,12 @@ public class RecipeService {
     }
 
     @Transactional
-    public RecipeResponseDTO findOneRecipe(Long recipeId, Long userId) {
+    public  RecipeResponseDTO findOneRecipe(Long recipeId, Long userId) {
         log.info("Service findOneRecipe");
 
         Recipe findRecipe = findByRecipeId(recipeId);
 
-        //UserReference에 View 반영
+        findRecipe.viewCountUp();
         referenceService.userRecipeView(findRecipe, userId);
 
         return RecipeResponseDTO.fromEntity(findRecipe);
