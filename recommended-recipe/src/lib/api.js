@@ -1,5 +1,5 @@
 const ACCESS_TOKEN_KEY = "accessToken";
-const BASE_PREFIX = "/studio-recipe"; // 스프링 context-path
+const BASE_PREFIX = "/studio-recipe"; // Spring context-path
 
 export function getAccessToken() {
   return localStorage.getItem(ACCESS_TOKEN_KEY);
@@ -31,7 +31,7 @@ export function saveTokens(tokenResponse) {
  * - JSON/텍스트/204 모두 안전
  * - 401이면 자동 로그아웃 이벤트 발생
  */
-async function request(path, options = {}, { withAuth, usePrefix = true } = { withAuth: true, usePrefix: true }) {
+async function request(path, options = {}, { withAuth } = { withAuth: true }) {
   const token = getAccessToken();
 
   const headers = new Headers(options.headers || {});
@@ -51,16 +51,13 @@ async function request(path, options = {}, { withAuth, usePrefix = true } = { wi
     headers.set("Authorization", `Bearer ${token}`);
   }
 
-  // ✅ Flask calls don't need the /studio-recipe prefix
-  const url = usePrefix ? `${BASE_PREFIX}${path}` : path;
-
-  const res = await fetch(url, {
+  const res = await fetch(`${BASE_PREFIX}${path}`, {
     ...options,
     body,
     headers,
   });
 
-  // ✅ 401 처리: 토큰 삭제 + 전역 이벤트 (App에서 잡아서 로그인으로 보냄)
+  // ✅ 401 처리: 토큰 삭제 + 전역 이벤트
   if (res.status === 401) {
     clearTokens();
     window.dispatchEvent(new CustomEvent("auth:logout", { detail: { reason: "expired" } }));
@@ -91,11 +88,9 @@ async function request(path, options = {}, { withAuth, usePrefix = true } = { wi
 }
 
 export async function apiFetch(path, options = {}) {
-  return request(path, options, { withAuth: true, usePrefix: true });
+  return request(path, options, { withAuth: true });
 }
 
 export async function publicFetch(path, options = {}) {
-  // ✅ Flask API calls (like /api/recommend) don't need Spring prefix
-  const isFlaskCall = path.startsWith('/api/');
-  return request(path, options, { withAuth: false, usePrefix: !isFlaskCall });
+  return request(path, options, { withAuth: false });
 }

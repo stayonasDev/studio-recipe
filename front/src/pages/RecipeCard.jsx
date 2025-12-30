@@ -1,36 +1,34 @@
 import "./recipeCard.css";
 
 export default function RecipeCard({ recipe, onOpenDetail, onToggleLike }) {
-  const {
-    rcpSno,
-    rcpTtl,
-    ckgNm,
-    ckgMtrlCn,
-    rcpImgUrl,
-    liked,
-    rcmmCnt,
-  } = recipe;
+  // ✅ Handle both Spring and Flask field formats
+  const id = recipe?.rcpSno ?? recipe?.id;
+  const title = recipe?.rcpTtl ?? recipe?.name ?? "제목 없음";
+  const menuName = recipe?.ckgNm ?? recipe?.menu_name ?? "";
+  const imageUrl = recipe?.rcpImgUrl ?? recipe?.img ?? "";
+  const liked = recipe?.liked;
+  const likeCount = recipe?.rcmmCnt ?? 0;
 
   function open() {
-    onOpenDetail?.(rcpSno);
+    onOpenDetail?.(id);
   }
 
   function onLikeClick(e) {
     // ✅ 메인에서 좋아요 눌렀을 때 detail 열리거나 스크롤 튀는 원인 차단
     e.preventDefault();
     e.stopPropagation();
-    onToggleLike?.(rcpSno, Boolean(liked));
+    onToggleLike?.(id, Boolean(liked));
   }
 
   return (
     <article className="card" onClick={open} role="button" tabIndex={0}>
       <div className="cardMedia">
-        {rcpImgUrl ? <img src={rcpImgUrl} alt={rcpTtl} loading="lazy" /> : <div className="mediaFallback" />}
+        {imageUrl ? <img src={imageUrl} alt={title} loading="lazy" /> : <div className="mediaFallback" />}
       </div>
 
       <div className="cardBody">
-        <div className="cardTitle">{rcpTtl}</div>
-        <div className="cardSub">{ckgNm || ""}</div>
+        <div className="cardTitle">{title}</div>
+        <div className="cardSub">{menuName}</div>
 
         <div className="cardBottom">
           <button
@@ -40,7 +38,7 @@ export default function RecipeCard({ recipe, onOpenDetail, onToggleLike }) {
             aria-pressed={Boolean(liked)}
           >
             <span className="heart">{liked ? "♥" : "♡"}</span>
-            <span className="cnt">{Number(rcmmCnt ?? 0)}</span>
+            <span className="cnt">{Number(likeCount)}</span>
           </button>
 
           <button

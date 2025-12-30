@@ -10,6 +10,9 @@ export default function App() {
   const [route, setRoute] = useState(() => (getAccessToken() ? "main" : "login"));
   const [detailId, setDetailId] = useState(null);
 
+  // Debug log to see current route
+  console.log("Current route:", route, "Has token:", !!getAccessToken());
+
   // ✅ 토큰 만료/401 등으로 api.js가 auth:logout 이벤트를 쏘면 여기서 처리
   useEffect(() => {
     const handler = () => {
@@ -47,7 +50,25 @@ export default function App() {
     return <RecipeDetailPage recipeId={detailId} onBack={() => setRoute("main")} />;
   }
 
-  // main
+  // main - explicitly ensure RecipeMainPage is rendered
+  if (route === "main") {
+    return (
+      <RecipeMainPage
+        onGoDetail={(id) => {
+          setDetailId(id);
+          setRoute("detail");
+        }}
+        onGoAdmin={() => setRoute("admin")}
+        onGoLogin={() => setRoute("login")}
+        onLogout={() => {
+          clearTokens();
+          setRoute("login");
+        }}
+      />
+    );
+  }
+
+  // fallback - should not reach here
   return (
     <RecipeMainPage
       onGoDetail={(id) => {

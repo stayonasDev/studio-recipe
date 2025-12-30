@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './signup.css';
-import api from './api/axios';
+import { publicFetch } from './lib/api';
 
-function SignupPage() {
+function SignupPage({ onSignupSuccess, onGoLogin }) {
   const [formData, setFormData] = useState({
-  "id": '',
-  "password": '',
-  "name": '',
-  "nickname": '',
-  "email": '',
-  "birth": '',
-  "gender": ''
+    "id": '',
+    "password": '',
+    "name": '',
+    "nickname": '',
+    "email": '',
+    "birth": '',
+    "gender": 'M' // Default to 'M' to match backend enum
   });
 
   // 유효성 검사 및 에러 메시지 상태
@@ -48,12 +48,12 @@ function SignupPage() {
 
 
   const handleCheckUserid = () => {
-    if (!formData.userid) {
+    if (!formData.id) {
       alert("아이디를 입력해주세요.");
       return;
     }
 
-    if (formData.userid === "admin" || formData.userid === "test") {
+    if (formData.id === "admin" || formData.id === "test") {
       alert("이미 사용 중인 아이디입니다.");
     } else {
       alert("사용 가능한 아이디입니다.");
@@ -96,14 +96,41 @@ function SignupPage() {
 
   const submitTest = async () => {
     console.log('submitTest 실행');
-    await api.post('/auth/registry', formData)
-    .then(response => {
-        if(response.status === 200){
-            console.log('Form Data Submitted:', formData);
-            alert('회원가입 완료!');
-            navigate('/');
-        } 
-    })
+    
+    // Validate required fields
+    const requiredFields = ['id', 'password', 'name', 'nickname', 'email', 'birth', 'gender'];
+    for (const field of requiredFields) {
+      if (!formData[field]) {
+        setError(`${field} 필드를 입력해주세요.`);
+        return;
+      }
+    }
+
+    // Check password confirmation
+    if (formData.password !== formData.passwordConfirm) {
+      setError('비밀번호가 일치하지 않습니다.');
+      return;
+    }
+
+    try {
+      // Prepare data for backend (exclude passwordConfirm)
+      const { passwordConfirm, ...submitData } = formData;
+      
+      const response = await publicFetch('/auth/register', {
+        method: 'POST',
+        body: submitData
+      });
+
+      console.log('Registration successful:', response);
+      alert('회원가입 완료!');
+      // ✅ Call the callback to navigate to login page
+      if (onSignupSuccess) {
+        onSignupSuccess();
+      }
+    } catch (error) {
+      console.error('Registration failed:', error);
+      setError(error.message || '회원가입에 실패했습니다.');
+    }
   }
 
 
@@ -127,15 +154,14 @@ function SignupPage() {
           <div className="input-group">
             <label htmlFor="gender">성별</label>
             <select id="gender" name="gender" value={formData.gender} onChange={handleChange} required>
-              <option value="">선택</option>
-              <option value="남">남</option>
-              <option value="여">여</option>
+              <option value="M">남성</option>
+              <option value="F">여성</option>
             </select>
           </div>
 
           <div className="input-group">
-            <label htmlFor="age">나이</label>
-            <input type="number" id="age" name="age" min="1" max="120" value={formData.age} onChange={handleChange} required />
+            <label htmlFor="birth">생년월일</label>
+            <input type="date" id="birth" name="birth" value={formData.birth} onChange={handleChange} required />
           </div>
 
           <div className="input-group">
@@ -144,9 +170,9 @@ function SignupPage() {
           </div>
 
           <div className="input-group">
-            <label htmlFor="userid">아이디</label>
+            <label htmlFor="id">아이디</label>
             <div className="nickname-group">
-              <input type="text" id="userid" name="userid" value={formData.userid} onChange={handleChange} required />
+              <input type="text" id="id" name="id" value={formData.id} onChange={handleChange} required />
               <button type="button" onClick={handleCheckUserid}>중복확인</button>
             </div>
           </div>
@@ -171,6 +197,13 @@ function SignupPage() {
           </div>
 
           <button type="button" className="submit-btn" onClick={submitTest}>회원가입</button>
+          
+          <div className="auth-footer">
+            <span>이미 계정이 있나요?</span>
+            <button type="button" className="link-btn" onClick={onGoLogin}>
+              로그인
+            </button>
+          </div>
         {/* </form> */}
       </div>
       </div>

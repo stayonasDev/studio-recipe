@@ -17,13 +17,18 @@ public enum SortBy {
     private final String fieldName;
 
     public static SortBy formString(String text) {
+        if (text == null || text.trim().isEmpty()) {
+            return CREATED_AT; // default fallback
+        }
+        
         for (SortBy b : SortBy.values()) {
-            if (b.name().equalsIgnoreCase(text) || b.fieldName.equalsIgnoreCase(text)) {
+            if (b.name().equalsIgnoreCase(text.trim()) || b.fieldName.equalsIgnoreCase(text.trim())) {
                 return b;
             }
         }
-//        throw new IllegalAccessException("Unsupported SortedBy value: " + text);
-        return null;
+        
+        // ✅ Return default instead of null to prevent NPE
+        return CREATED_AT;
     }
 
 }

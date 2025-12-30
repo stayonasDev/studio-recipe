@@ -140,3 +140,43 @@ button.submit-btn:hover {
   font-size: 0.9rem;
   margin-top: 0.3rem;
 }
+
+/* Auth footer styles */
+.auth-footer {
+  margin-top: 20px;
+  text-align: center;
+  color: #666;
+}
+
+.auth-footer span {
+  margin-right: 8px;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: inherit;
+}
+
+.link-btn:hover {
+  color: #0056b3;
+}
+
+/* Login container styles */
+.login-container {
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 30px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+}
+
+.login-container h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #333;
+}

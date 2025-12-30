@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { apiFetch } from "../lib/api";
+import { apiFetch, publicFetch } from "../lib/api";
 import "./main.css";
 
 /** DTO 필드명이 섞여도 안전하게 읽기 */
@@ -7,10 +7,10 @@ function getId(r) {
   return r?.rcpSno ?? r?.recipeId ?? r?.id;
 }
 function getTitle(r) {
-  return r?.rcpTtl ?? r?.title ?? "제목 없음";
+  return r?.rcpTtl ?? r?.title ?? r?.name ?? "제목 없음"; // ✅ Flask: name
 }
 function getImg(r) {
-  return r?.rcpImgUrl ?? r?.imgUrl ?? r?.imageUrl ?? "";
+  return r?.rcpImgUrl ?? r?.imgUrl ?? r?.imageUrl ?? r?.img ?? ""; // ✅ Flask: img
 }
 function getLikeCount(r) {
   const v = r?.rcmmCnt ?? r?.recommendedCount ?? r?.likeCount ?? 0;
@@ -73,9 +73,9 @@ export default function RecipeMainPage({ onGoDetail, onGoAdmin, onLogout, onGoLo
       const params = new URLSearchParams({ k: "10", lambda: "0.8" });
       if (nextSeedId != null) params.set("seedRecipeId", String(nextSeedId));
 
-      // ✅ 프론트는 SpringBoot만 호출 (/studio-recipe 프록시)
-      const data = await apiFetch(`/recommend-recipes?${params.toString()}`);
-      setRecs(Array.isArray(data) ? data : []);
+      // ✅ Flask 추천 서비스 직접 호출 (no auth required)
+      const data = await publicFetch(`/api/recommend?${params.toString()}`);
+      setRecs(Array.isArray(data?.data) ? data.data : []);
     } catch (e) {
       setRecs([]);
       setErr(e?.message || "추천 로딩 실패");
