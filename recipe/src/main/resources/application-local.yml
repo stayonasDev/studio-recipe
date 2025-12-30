@@ -1,11 +1,12 @@
 spring:
   config:
     import: optional:file:.env[.properties]
+
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://localhost:3306/recipe?characterEncoding=utf8&serverTimezone=UTC
+    url: "jdbc:mariadb://localhost:3306/Recipe_db?characterEncoding=utf8&serverTimezone=Asia/Seoul&useGssapi=false"
     username: root
-    password: tlwkrdmldkdlA!
+    password: "1234"
 
   jackson:
     serialization:
@@ -18,12 +19,13 @@ spring:
       hibernate:
         format_sql: true
         use_sql_comments: true
+    database-platform: org.hibernate.dialect.MariaDBDialect
 
   batch:
     jdbc:
-      initialize-schema: always # Spring Batch 메타데이터 테이블 자동 생성
+      initialize-schema: never
     job:
-      enabled: false # 애플리케이션 시작 시 Job 자동 실행 방지 (수동 실행 위함)
+      enabled: false
 
   mail:
     host: smtp.naver.com
@@ -33,12 +35,9 @@ spring:
     properties:
       mail.smtp.auth: true
       mail.smtp.ssl.enable: true
-      #      mail.smtp.starttls.enable: true   # TLS 쓸 땐 587 포트 + 이 옵션 사용
-      #      mail.smtp.starttls.required: true
-
-      mail.smtp.timeout: 5000               # 연결 타임아웃
-      mail.smtp.connectiontimeout: 5000     # 연결 타임아웃
-      mail.smtp.writetimeout: 5000          # 쓰기 타임아웃
+      mail.smtp.timeout: 5000
+      mail.smtp.connectiontimeout: 5000
+      mail.smtp.writetimeout: 5000
 
   data:
     redis:
@@ -64,19 +63,16 @@ front:
   urls: "http://localhost:5173,https://rapa8.shop,https://www.rapa8.shop"
 
 recommender:
-  flask-base-url: http://127.0.0.1:5000
+  flask-base-url: http://127.0.0.1:5001
 
-logging.level:
-  org.hibernate.SQL: debug
-  org.hibernate.orm.jdbc.bind: TRACE
-  org.springframework.security.web: TRACE
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.orm.jdbc.bind: TRACE
+    org.springframework.security.web: TRACE
 
 management:
   endpoints:
     web:
       exposure:
         include: "health"
-
-
-flask:
-  base-url: http://127.0.0.1:5000

@@ -15,7 +15,7 @@ java {
 }
 
 bootJar {
-    archiveFileName = "app.jar" // 빌드 결과 JAR 파일명을 app.jar로 고정
+    archiveFileName = "app.jar"
 }
 
 configurations {
@@ -29,46 +29,72 @@ repositories {
 }
 
 dependencies {
+    /* ===============================
+       Spring Boot Starters
+    =============================== */
+    implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    compileOnly 'org.projectlombok:lombok'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    // runtimeOnly 'com.h2database:h2'
-//	 runtimeOnly 'com.mysql:mysql-connector-j'
-    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
-    annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.security:spring-security-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
-
-    implementation 'org.springframework.boot:spring-boot-starter-batch'
-    implementation 'io.github.cdimascio:dotenv-java:3.0.0'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.boot:spring-boot-starter-batch'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
+    /* ===============================
+       MariaDB (🔥 Kerberos 문제 해결 핵심)
+    =============================== */
+    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client:3.3.3'
+
+    /* ===============================
+       JWT
+    =============================== */
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
-    // Jackson 관련 의존성
+    /* ===============================
+       Swagger / OpenAPI
+    =============================== */
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
+
+    /* ===============================
+       Jackson (LocalDateTime 등)
+    =============================== */
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8'
 
+    /* ===============================
+       Utils
+    =============================== */
+    implementation 'io.github.cdimascio:dotenv-java:3.0.0'
 
-    //	Test Log 어노테이션
+    /* ===============================
+       Lombok
+    =============================== */
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    /* ===============================
+       Test
+    =============================== */
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
 }
 
-tasks.named('test') {
-    useJUnitPlatform()
-
+/* ===============================
+   🔥 Spring BOM이 MariaDB 버전 덮어쓰지 못하게 강제 고정
+=============================== */
+configurations.all {
+    resolutionStrategy {
+        force 'org.mariadb.jdbc:mariadb-java-client:3.3.3'
+    }
 }
 
-
+tasks.named('test') {
+    useJUnitPlatform()
+}

@@ -77,6 +77,8 @@ public class SecurityConfig {
                                 .requestMatchers(
 					"/batch/run-recipe-csv",
                                         "/auth/**",
+                                        "/main-pages", // ✅ Allow public access to recipe list
+                                        "/recipes/**", // ✅ Allow public access to recipe details
                                         "/swagger-ui/**",
                                         "/v3/api-docs/**",
                                         "/v3/api-docs",

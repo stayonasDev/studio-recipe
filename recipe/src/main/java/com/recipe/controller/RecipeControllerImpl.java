@@ -55,11 +55,17 @@ class RecipeControllerImpl implements RecipeController {
             @RequestParam(defaultValue = "asc") String direction,
             @RequestParam(defaultValue = "CREATED_AT") String sortBy
     ){
+        // ✅ Handle null case from SortBy.formString()
+        SortBy sortByEnum = SortBy.formString(sortBy);
+        if (sortByEnum == null) {
+            sortByEnum = SortBy.CREATED_AT; // fallback to default
+        }
+        
         PageRequestDTO requestPage = PageRequestDTO.builder()
                 .page(page)
                 .size(size)
                 .direction(direction)
-                .sortBy(SortBy.formString(sortBy))
+                .sortBy(sortByEnum)
                 .build();
 
         Pageable pageable = requestPage.getPageable();
@@ -73,7 +79,8 @@ class RecipeControllerImpl implements RecipeController {
             @PathVariable("recipeId") Long recipeId,
             @AuthenticationPrincipal CustomerDetails customer){
 
-        Long userId = customer.getUserId();
+        // ✅ Allow both authenticated and anonymous access
+        Long userId = (customer != null) ? customer.getUserId() : null;
         RecipeResponseDTO recipe = recipeService.findOneRecipe(recipeId, userId);
         return ResponseEntity.ok(recipe);
     }

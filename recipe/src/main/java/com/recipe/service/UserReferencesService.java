@@ -70,7 +70,10 @@ public class UserReferencesService {
 
     @Transactional
     public void userRecipeView(Recipe recipe, Long userId) {
-        upsertPreference(recipe, userId, PreferenceType.VIEW);
+        // ✅ Skip user preference tracking for anonymous users
+        if (userId != null) {
+            upsertPreference(recipe, userId, PreferenceType.VIEW);
+        }
     }
 
     @Transactional

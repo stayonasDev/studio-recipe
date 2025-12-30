@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { apiFetch } from "../lib/api";
+import { apiFetch, publicFetch } from "../lib/api";
 import RecipeDetailPage from "./RecipeDetailPage";
 import RecipeCard from "../components/RecipeCard";
 import "./main.css";
@@ -21,8 +21,9 @@ export default function MainPage() {
 
   async function loadRecommend() {
     try {
-      const data = await apiFetch(`/recommend-recipes?k=${recK}&lambda=${recLambda}`);
-      setRecommended(Array.isArray(data) ? data : []);
+      // ✅ Flask 추천 서비스 직접 호출 (no auth required)
+      const data = await publicFetch(`/api/recommend?k=${recK}&lambda=${recLambda}`);
+      setRecommended(Array.isArray(data?.data) ? data.data : []);
     } catch {
       setRecommended([]);
     }
@@ -58,29 +59,30 @@ export default function MainPage() {
   }
 
   // ✅ 좋아요: optimistic update + 서버 반영
-  async function toggleLike(rcpSno, currentlyLiked) {
-    if (!rcpSno) return;
-    if (likingRef.current.has(rcpSno)) return;
-    likingRef.current.add(rcpSno);
+  async function toggleLike(recipeId, currentlyLiked) {
+    if (!recipeId) return;
+    if (likingRef.current.has(recipeId)) return;
+    likingRef.current.add(recipeId);
 
     const nextLiked = !currentlyLiked;
 
     const patch = (arr) =>
-      arr.map((r) =>
-        r.rcpSno === rcpSno
+      arr.map((r) => {
+        const id = r.rcpSno || r.id;
+        return id === recipeId
           ? {
               ...r,
               liked: nextLiked,
               rcmmCnt: Math.max(0, Number(r.rcmmCnt ?? 0) + (nextLiked ? 1 : -1)),
             }
-          : r
-      );
+          : r;
+      });
 
     setRecommended((prev) => patch(prev));
     setAllRecipes((prev) => patch(prev));
 
     try {
-      await apiFetch(`/likes/${rcpSno}`, {
+      await apiFetch(`/likes/${recipeId}`, {
         method: nextLiked ? "POST" : "DELETE",
       });
 
@@ -91,7 +93,7 @@ export default function MainPage() {
       await loadRecommend();
       await loadAll(page);
     } finally {
-      likingRef.current.delete(rcpSno);
+      likingRef.current.delete(recipeId);
     }
   }
 
@@ -143,7 +145,7 @@ export default function MainPage() {
           {tab === "home" && (
             <section className="grid">
               {recommended.map((r) => (
-                <RecipeCard key={r.rcpSno} recipe={r} onOpenDetail={openDetail} onToggleLike={toggleLike} />
+                <RecipeCard key={r.rcpSno || r.id} recipe={r} onOpenDetail={openDetail} onToggleLike={toggleLike} />
               ))}
               {recommended.length === 0 && <div className="empty">추천 레시피가 없습니다.</div>}
             </section>

@@ -40,6 +40,10 @@ export default function RegisterPage({ onGoLogin }) {
       });
 
       setOk("회원가입이 완료되었습니다. 로그인 해주세요.");
+      // ✅ Auto-navigate to login after 2 seconds
+      setTimeout(() => {
+        onGoLogin();
+      }, 2000);
     } catch (e2) {
       setError(e2.message || "회원가입 실패");
     }
