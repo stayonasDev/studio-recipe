@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { apiFetch, publicFetch } from "../lib/api";
+import { apiFetch, publicFetch, getAccessToken } from "../lib/api";
 import "./main.css";
 
 /** DTO 필드명이 섞여도 안전하게 읽기 */
@@ -53,11 +53,13 @@ export default function RecipeMainPage({ onGoDetail, onGoAdmin, onLogout, onGoLo
 
   // 데이터
   const [seedRecipeId, setSeedRecipeId] = useState(null);
-  const [recs, setRecs] = useState([]);
+  const [flaskRecs, setFlaskRecs] = useState([]);
+  const [springRecs, setSpringRecs] = useState([]);
   const [allPage, setAllPage] = useState(null);
 
   // 로딩/에러
-  const [loadingRecs, setLoadingRecs] = useState(false);
+  const [loadingFlaskRecs, setLoadingFlaskRecs] = useState(false);
+  const [loadingSpringRecs, setLoadingSpringRecs] = useState(false);
   const [loadingAll, setLoadingAll] = useState(false);
   const [err, setErr] = useState("");
 
@@ -66,8 +68,8 @@ export default function RecipeMainPage({ onGoDetail, onGoAdmin, onLogout, onGoLo
   const [scrapState, setScrapState] = useState(() => new Set()); // id set (UI만)
 
   // ---------------- API loaders ----------------
-  async function loadRecommendations(nextSeedId = null) {
-    setLoadingRecs(true);
+  async function loadFlaskRecommendations(nextSeedId = null) {
+    setLoadingFlaskRecs(true);
     setErr("");
     try {
       const params = new URLSearchParams({ k: "10", lambda: "0.8" });
@@ -75,12 +77,47 @@ export default function RecipeMainPage({ onGoDetail, onGoAdmin, onLogout, onGoLo
 
       // ✅ Flask 추천 서비스 직접 호출 (no auth required)
       const data = await publicFetch(`/api/recommend?${params.toString()}`);
-      setRecs(Array.isArray(data?.data) ? data.data : []);
+
+      setFlaskRecs(Array.isArray(data?.data) ? data.data : []);
     } catch (e) {
-      setRecs([]);
-      setErr(e?.message || "추천 로딩 실패");
+      setFlaskRecs([]);
+      setErr(e?.message || "Flask 추천 로딩 실패");
     } finally {
-      setLoadingRecs(false);
+      setLoadingFlaskRecs(false);
+    }
+  }
+
+  async function loadSpringRecommendations(nextSeedId = null) {
+    // ✅ 로그인하지 않은 경우 Spring Boot 추천 호출하지 않음
+    const token = getAccessToken();
+    if (!token) {
+      console.log("Spring Boot 추천: 토큰이 없어 호출하지 않음");
+      setSpringRecs([]);
+      setLoadingSpringRecs(false);
+      return;
+    }
+
+    setLoadingSpringRecs(true);
+    setErr("");
+    try {
+      const params = new URLSearchParams({ k: "10", lambda: "0.8" });
+      if (nextSeedId != null) params.set("seedRecipeId", String(nextSeedId));
+
+      console.log("Spring Boot 추천 호출:", `/recommend-recipes?${params.toString()}`);
+      console.log("사용 토큰:", token ? "있음" : "없음");
+
+      // ✅ Spring Boot 추천 서비스 호출 - 올바른 엔드포인트 사용
+      const data = await apiFetch(`/recommend-recipes?${params.toString()}`);
+
+      console.log("Spring Boot 추천 응답:", data);
+      setSpringRecs(Array.isArray(data) ? data : []);
+    } catch (e) {
+      setSpringRecs([]);
+      console.error("Spring Boot 추천 로딩 실패:", e);
+      console.error("에러 상세:", e.message, e.stack);
+      setErr(e?.message || "Spring Boot 추천 로딩 실패");
+    } finally {
+      setLoadingSpringRecs(false);
     }
   }
 
@@ -108,7 +145,8 @@ export default function RecipeMainPage({ onGoDetail, onGoAdmin, onLogout, onGoLo
 
   useEffect(() => {
     // 첫 진입 추천 + 전체
-    loadRecommendations(null);
+    loadFlaskRecommendations(null);
+    loadSpringRecommendations(null);
     loadAllRecipes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -130,13 +168,15 @@ export default function RecipeMainPage({ onGoDetail, onGoAdmin, onLogout, onGoLo
 
     // ✅ 화면 흔들림 방지 핵심:
     // - 추천은 "카드 클릭(상세 이동)"에서만 갱신
-    loadRecommendations(recipeId);
+    loadFlaskRecommendations(recipeId);
+    loadSpringRecommendations(recipeId);
 
     onGoDetail?.(recipeId);
   }
 
   function refreshRecommend() {
-    loadRecommendations(seedRecipeId ?? null);
+    loadFlaskRecommendations(seedRecipeId ?? null);
+    loadSpringRecommendations(seedRecipeId ?? null);
   }
 
   async function toggleLike(e, recipe) {
@@ -171,7 +211,8 @@ export default function RecipeMainPage({ onGoDetail, onGoAdmin, onLogout, onGoLo
 
       // ✅ 좋아요 누르면 추천을 즉시 바꾸고 싶다면 여기서 seed 기반으로 갱신
       // (단, 흔들림이 싫으면 주석 처리)
-      // loadRecommendations(id);
+      // loadFlaskRecommendations(id);
+      // loadSpringRecommendations(id);
 
     } catch (err) {
       // 백엔드가 "이미 좋아요..." 같은 텍스트를 내려주는 경우 JSON 파싱 에러가 났던 적이 있어
@@ -323,21 +364,46 @@ export default function RecipeMainPage({ onGoDetail, onGoAdmin, onLogout, onGoLo
       <main className="mainBody">
         {err && <div className="toastErr">{err}</div>}
 
-        {/* 추천 */}
+        {/* Flask 추천 */}
         <section className="section">
           <div className="sectionTitleRow">
-            <h2 className="sectionTitle">추천 레시피</h2>
-            <button className="miniBtn" onClick={refreshRecommend} disabled={loadingRecs} type="button">
+            <h2 className="sectionTitle">Flask AI 추천 레시피</h2>
+            <button className="miniBtn" onClick={refreshRecommend} disabled={loadingFlaskRecs} type="button">
               새로고침
             </button>
           </div>
 
           <div className="gridFixed">
-            {loadingRecs
-              ? Array.from({ length: 10 }).map((_, i) => <SkeletonCard key={`rec-skel-${i}`} />)
-              : recs.map((r) => <RecipeCard key={getId(r)} r={r} />)}
+            {loadingFlaskRecs
+              ? Array.from({ length: 10 }).map((_, i) => <SkeletonCard key={`flask-skel-${i}`} />)
+              : flaskRecs.map((r) => <RecipeCard key={`flask-${getId(r)}`} r={r} />)}
           </div>
         </section>
+
+        {/* Spring Boot 추천 */}
+        <section className="section">
+          <div className="sectionTitleRow">
+            <h2 className="sectionTitle">Spring Boot 개인화 추천 레시피</h2>
+            <button className="miniBtn" onClick={refreshRecommend} disabled={loadingSpringRecs} type="button">
+              새로고침
+            </button>
+          </div>
+
+          <div className="gridFixed">
+            {!getAccessToken() ? (
+              <div className="loginPrompt">
+                <p>개인화 추천을 보려면 로그인이 필요합니다.</p>
+                <button className="miniBtn" onClick={() => onGoLogin?.()} type="button">
+                  로그인하기
+                </button>
+              </div>
+            ) : loadingSpringRecs ? (
+              Array.from({ length: 10 }).map((_, i) => <SkeletonCard key={`spring-skel-${i}`} />)
+            ) : (
+              springRecs.map((r) => <RecipeCard key={`spring-${getId(r)}`} r={r} />)
+            )}
+          </div>
+        </section>        
 
         {/* 전체 */}
         <section className="section">

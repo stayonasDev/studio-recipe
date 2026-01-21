@@ -94,6 +94,11 @@ export async function apiFetch(path, options = {}) {
   return request(path, options, { withAuth: true, usePrefix: true });
 }
 
+export async function springApiFetch(path, options = {}) {
+  // ✅ Spring Boot API calls - vite proxy already handles /studio-recipe routing
+  return request(path, options, { withAuth: true, usePrefix: false });
+}
+
 export async function publicFetch(path, options = {}) {
   // ✅ Flask API calls (like /api/recommend) don't need Spring prefix
   const isFlaskCall = path.startsWith('/api/');

@@ -298,6 +298,25 @@ body{
   color: rgba(255,255,255,.78);
 }
 
+/* 재료 칩 */
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.chip {
+  display: inline-block;
+  padding: 4px 8px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 12px;
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
 /* Pager */
 .pager{
   padding: 0 14px 14px;
@@ -376,6 +395,33 @@ body{
 .empty {
   padding: 20px;
   opacity: 0.8;
+}
+
+/* 로그인 프롬프트 */
+.loginPrompt {
+  grid-column: 1 / -1;
+  padding: 40px 20px;
+  text-align: center;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+  border-radius: var(--radius);
+  color: var(--muted);
+}
+
+.loginPrompt p {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+}
+
+.loginPrompt .miniBtn {
+  background: rgba(110,231,255,.12);
+  border-color: rgba(110,231,255,.28);
+  color: var(--accent);
+}
+
+.loginPrompt .miniBtn:hover {
+  background: rgba(110,231,255,.18);
+  border-color: rgba(110,231,255,.35);
 }
 
 
