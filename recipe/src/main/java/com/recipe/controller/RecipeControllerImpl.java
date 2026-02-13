@@ -55,7 +55,6 @@ class RecipeControllerImpl implements RecipeController {
             @RequestParam(defaultValue = "asc") String direction,
             @RequestParam(defaultValue = "CREATED_AT") String sortBy
     ){
-        // ✅ Handle null case from SortBy.formString()
         SortBy sortByEnum = SortBy.formString(sortBy);
         if (sortByEnum == null) {
             sortByEnum = SortBy.CREATED_AT; // fallback to default
@@ -79,7 +78,6 @@ class RecipeControllerImpl implements RecipeController {
             @PathVariable("recipeId") Long recipeId,
             @AuthenticationPrincipal CustomerDetails customer){
 
-        // ✅ Allow both authenticated and anonymous access
         Long userId = (customer != null) ? customer.getUserId() : null;
         RecipeResponseDTO recipe = recipeService.findOneRecipe(recipeId, userId);
         return ResponseEntity.ok(recipe);

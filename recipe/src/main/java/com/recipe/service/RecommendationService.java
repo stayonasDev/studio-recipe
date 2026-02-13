@@ -14,12 +14,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RecommendationService {
 
-    private final RestClient flaskRestClient;   // ✅ 위 Bean 주입됨
+    private final RestClient flaskRestClient;
     private final RecipeRepository recipeRepository;
 
     public List<RecipeResponseDTO> recommendForUser(Long userId, int k, double lambda, Long seedRecipeId) {
 
-        // ✅ Flask 호출 (실패해도 빈 배열 반환)
         Long[] ids;
         try {
             ids = flaskRestClient.get()
@@ -43,11 +42,11 @@ public class RecommendationService {
 
         List<Long> idList = Arrays.asList(ids);
 
-        // ✅ DB에서 조회
+
         List<Recipe> recipes = recipeRepository.findByRcpSnoIn(idList);
         if (recipes == null || recipes.isEmpty()) return List.of();
 
-        // ✅ 추천 순서 유지
+
         Map<Long, Recipe> map = recipes.stream()
                 .collect(Collectors.toMap(Recipe::getRcpSno, r -> r));
 
@@ -61,7 +60,6 @@ public class RecommendationService {
     }
 
     private RecipeResponseDTO toDto(Recipe r) {
-        // ✅ 너 프로젝트 DTO builder 필드에 맞춤
         return RecipeResponseDTO.builder()
                 .rcpSno(r.getRcpSno())
                 .rcpTtl(r.getRcpTtl())

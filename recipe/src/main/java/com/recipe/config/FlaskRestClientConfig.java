@@ -13,7 +13,6 @@ public class FlaskRestClientConfig {
 
     @Bean
     public RestClient flaskRestClient() {
-        // ✅ JDK HttpClient: keep-alive + connection reuse
         HttpClient httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(2))
                 .version(HttpClient.Version.HTTP_1_1)

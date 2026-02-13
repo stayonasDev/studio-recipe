@@ -25,7 +25,6 @@ public class AdminTrainController {
                     .body(Object.class);
             return ResponseEntity.ok(res);
         } catch (Exception e) {
-            // ✅ Flask가 죽어도 500 대신 200으로 "실패" 메시지 반환
             return ResponseEntity.ok(Map.of(
                     "ok", false,
                     "message", "Flask 연결 실패: " + e.getMessage()
