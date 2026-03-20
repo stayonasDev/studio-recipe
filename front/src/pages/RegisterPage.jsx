@@ -10,7 +10,7 @@ export default function RegisterPage({ onGoLogin }) {
     nickname: "",
     email: "",
     birth: "", // yyyy-MM-dd
-    gender: "M", // ✅ 서버 enum: M/F
+    gender: "M", // 서버 enum: M/F
   });
 
   const [error, setError] = useState("");
@@ -40,7 +40,7 @@ export default function RegisterPage({ onGoLogin }) {
       });
 
       setOk("회원가입이 완료되었습니다. 로그인 해주세요.");
-      // ✅ Auto-navigate to login after 2 seconds
+      // Auto-navigate to login after 2 seconds
       setTimeout(() => {
         onGoLogin();
       }, 2000);
@@ -127,7 +127,7 @@ export default function RegisterPage({ onGoLogin }) {
           {error && <div className="errorBox span2">{error}</div>}
           {ok && <div className="okBox span2">{ok}</div>}
 
-          {/* ✅ 버튼이 아래로 빠지는 문제: span2 + width 100% */}
+          {/* 버튼이 아래로 빠지는 문제: span2 + width 100% */}
           <button className="primaryBtn span2" type="submit">
             가입하기
           </button>

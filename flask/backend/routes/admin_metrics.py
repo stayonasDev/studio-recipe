@@ -3,7 +3,6 @@ from flask import Blueprint, current_app, jsonify, make_response
 from sqlalchemy import text
 from backend.extensions import db
 
-# 너가 이미 쓰고 있는 추천 함수(같은 recommend_mmr.py에 있음)
 from backend.services.recommender_mmr import recommend_mmr
 
 bp = Blueprint("admin_metrics", __name__)
@@ -15,7 +14,7 @@ def _dcg(binary_rels):
     s = 0.0
     for i, rel in enumerate(binary_rels, start=1):
         if rel:
-            s += 1.0 / ((i + 1) ** 0.5)  # 간단 로그대신 완만한 discount
+            s += 1.0 / ((i + 1) ** 0.5)
     return s
 
 def _ndcg_at_k(rec_ids, gt_set, k):
@@ -59,7 +58,6 @@ def _find_positive_table(conn):
     return None
 
 def _get_total_recipe_count(conn):
-    # 너가 준 엔티티 기준: RECIPES (RCP_SNO)
     try:
         return int(conn.execute(text("SELECT COUNT(*) FROM RECIPES")).scalar() or 0)
     except Exception:
@@ -103,7 +101,7 @@ def _load_user_positives(conn, table, user_col, recipe_col, max_users=200, min_p
 
 def _holdout_split(gt_set):
     """
-    ✅ B안: leave-one-out 홀드아웃
+    B안: leave-one-out 홀드아웃
     - gt_set에서 1개를 test로 떼고 나머지는 train_seen으로 반환
     - (현재는 "가장 큰 id"를 test로 잡음: 재현성 확보)
     """
@@ -116,7 +114,7 @@ def _holdout_split(gt_set):
 
 def _no_cache_json(payload, status=200):
     resp = make_response(jsonify(payload), status)
-    # ✅ 캐시 고정값 방지
+    # 캐시 고정값 방지
     resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
     resp.headers["Pragma"] = "no-cache"
     resp.headers["Expires"] = "0"
@@ -133,7 +131,7 @@ def admin_metrics():
       - usersEvaluated, positivesTotal, avgPositivesPerUser, totalRecipes, posTable
     """
     k = 10
-    lam = 0.8  # 지표는 기본값으로 계산 (원하면 query param으로도 받을 수 있음)
+    lam = 0.8  # 지표는 기본값으로 계산
 
     try:
         eng = db.engine
@@ -201,7 +199,7 @@ def admin_metrics():
                     continue
 
                 try:
-                    # ✅ 핵심: train_seen만 제외하고, test_item은 추천 후보에 남겨둔다.
+                    # 핵심: train_seen만 제외하고, test_item은 추천 후보에 남겨둔다.
                     rec_ids = recommend_mmr(
                         user_id=uid,
                         k=k,
@@ -245,6 +243,12 @@ def admin_metrics():
                     "recipe embeddings empty, or recommend_mmr failing). "
                     f"failedRecommendUsers={failed_users}"
                 )
+                print("uid:", uid)
+                print("gt:", gt)
+                print("test_item:", test_item)
+                print("train_seen size:", len(train_seen))
+                print("rec_ids:", rec_ids[:10])
+                print("hit:", test_item in rec_ids[:k])
 
             return _no_cache_json({
                 "recallAt10": recall_at_10,

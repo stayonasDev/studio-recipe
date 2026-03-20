@@ -1,7 +1,6 @@
 import "./recipeCard.css";
 
 export default function RecipeCard({ recipe, onOpenDetail, onToggleLike }) {
-  // ✅ Handle both Spring and Flask field formats
   const id = recipe?.rcpSno ?? recipe?.id;
   const title = recipe?.rcpTtl ?? recipe?.name ?? "제목 없음";
   const menuName = recipe?.ckgNm ?? recipe?.menu_name ?? "";
@@ -14,7 +13,7 @@ export default function RecipeCard({ recipe, onOpenDetail, onToggleLike }) {
   }
 
   function onLikeClick(e) {
-    // ✅ 메인에서 좋아요 눌렀을 때 detail 열리거나 스크롤 튀는 원인 차단
+    // 메인에서 좋아요 눌렀을 때 detail 열리거나 스크롤 튀는 원인 차단
     e.preventDefault();
     e.stopPropagation();
     onToggleLike?.(id, Boolean(liked));
@@ -32,7 +31,7 @@ export default function RecipeCard({ recipe, onOpenDetail, onToggleLike }) {
 
         <div className="cardBottom">
           <button
-            type="button"               /* ✅ 중요 */
+            type="button"             
             className={`likePill ${liked ? "active" : ""}`}
             onClick={onLikeClick}
             aria-pressed={Boolean(liked)}

@@ -13,7 +13,7 @@ export default function App() {
   // Debug log to see current route
   console.log("Current route:", route, "Has token:", !!getAccessToken());
 
-  // ✅ 토큰 만료/401 등으로 api.js가 auth:logout 이벤트를 쏘면 여기서 처리
+  // 토큰 만료/401 등으로 api.js가 auth:logout 이벤트를 쏘면 여기서 처리
   useEffect(() => {
     const handler = () => {
       clearTokens();
@@ -42,7 +42,7 @@ export default function App() {
   }
 
   if (route === "admin") {
-    // ✅ AdminPage에 onBack 넘기고, 버튼 누르면 setRoute("main") 하게 만들면 됨
+    // AdminPage에 onBack 넘기고, 버튼 누르면 setRoute("main") 하게 만들면 됨
     return <AdminPage onBack={() => setRoute("main")} />;
   }
 

@@ -19,7 +19,7 @@ public class FlaskRestClientConfig {
                 .build();
 
         JdkClientHttpRequestFactory factory = new JdkClientHttpRequestFactory(httpClient);
-        factory.setReadTimeout(Duration.ofSeconds(3)); // ✅ 응답 지연/먹통 방지
+        factory.setReadTimeout(Duration.ofSeconds(3)); // 응답 지연/먹통 방지
 
         return RestClient.builder()
                 .baseUrl("http://127.0.0.1:5000")

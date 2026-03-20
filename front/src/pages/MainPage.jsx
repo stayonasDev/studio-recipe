@@ -21,7 +21,7 @@ export default function MainPage() {
 
   async function loadRecommend() {
     try {
-      // ✅ Flask 추천 서비스 직접 호출 (no auth required)
+      // Flask 추천 서비스 직접 호출 (no auth required)
       const data = await publicFetch(`/api/recommend?k=${recK}&lambda=${recLambda}`);
       setRecommended(Array.isArray(data?.data) ? data.data : []);
     } catch {
@@ -58,7 +58,7 @@ export default function MainPage() {
     setDetailId(null);
   }
 
-  // ✅ 좋아요: optimistic update + 서버 반영
+  // 좋아요: optimistic update + 서버 반영
   async function toggleLike(recipeId, currentlyLiked) {
     if (!recipeId) return;
     if (likingRef.current.has(recipeId)) return;
@@ -86,7 +86,7 @@ export default function MainPage() {
         method: nextLiked ? "POST" : "DELETE",
       });
 
-      // ✅ 여기서 loadRecommend()를 즉시 호출하지 않음 (깜박임/위로 튐 방지)
+      // 여기서 loadRecommend()를 즉시 호출하지 않음 (깜박임/위로 튐 방지)
       // 필요하면 “새로고침” 버튼으로 갱신하거나, 상세 페이지에서만 갱신.
     } catch {
       // 실패 시: 안전하게 다시 로드(원복)
@@ -122,7 +122,7 @@ export default function MainPage() {
             전체
           </button>
 
-          {/* ✅ 추천 수동 새로고침 버튼 (깜박임 최소화) */}
+          {/* 추천 수동 새로고침 버튼 (깜박임 최소화) */}
           <button type="button" className="tab ghost" onClick={loadRecommend}>
             새로고침
           </button>

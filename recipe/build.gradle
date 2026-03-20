@@ -8,6 +8,7 @@ group = 'com'
 version = '0.0.1-SNAPSHOT'
 description = '음식조합추천시스템'
 
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
@@ -42,10 +43,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-batch'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
-    /* ===============================
-       MariaDB (🔥 Kerberos 문제 해결 핵심)
-    =============================== */
-    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client:3.3.3'
+
+//    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client:3.3.3'
+    runtimeOnly 'com.mysql:mysql-connector-j'
 
     /* ===============================
        JWT
@@ -89,11 +89,11 @@ dependencies {
 /* ===============================
    🔥 Spring BOM이 MariaDB 버전 덮어쓰지 못하게 강제 고정
 =============================== */
-configurations.all {
-    resolutionStrategy {
-        force 'org.mariadb.jdbc:mariadb-java-client:3.3.3'
-    }
-}
+//configurations.all {
+//    resolutionStrategy {
+//        force 'org.mariadb.jdbc:mariadb-java-client:3.3.3'
+//    }
+//}
 
 tasks.named('test') {
     useJUnitPlatform()

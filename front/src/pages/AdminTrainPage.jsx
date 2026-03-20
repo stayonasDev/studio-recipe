@@ -29,7 +29,7 @@ export default function AdminTrainPage({ onBack }) {
     setStarting(true);
     setError("");
     try {
-      // ✅ 브라우저에서 GET이 아니라 POST로 호출
+      // 브라우저에서 GET이 아니라 POST로 호출
       await apiFetch("/admin/train-bpr", { method: "POST" });
 
       // 시작 직후 상태 즉시 갱신
@@ -44,7 +44,7 @@ export default function AdminTrainPage({ onBack }) {
   useEffect(() => {
     loadStatus();
 
-    // ✅ 1~2초 폴링 (너무 촘촘하면 서버 부담)
+    // 1~2초 폴링 (너무 촘촘하면 서버 부담)
     timerRef.current = setInterval(() => {
       loadStatus(true);
     }, 1500);

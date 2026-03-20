@@ -67,7 +67,7 @@ export default function AdminPage({ onBack }) {
   const [err, setErr] = useState("");
   const [showDebug, setShowDebug] = useState(false);
 
-  // ✅ 폴링 컨트롤
+  // 폴링 컨트롤
   const pollTimerRef = useRef(null);
   const pollStopRef = useRef(false);
 
@@ -115,7 +115,7 @@ export default function AdminPage({ onBack }) {
     }
   }
 
-  // ✅ 학습 시작 후 자동 폴링: running=false 되는 순간 자동으로 배지 갱신
+  // 학습 시작 후 자동 폴링: running=false 되는 순간 자동으로 배지 갱신
   async function startTrain() {
     setBusyTrainStart(true);
     setErr("");
@@ -162,7 +162,7 @@ export default function AdminPage({ onBack }) {
     }
   }
 
-  // ✅ 지표 재계산: 재계산 후 자동으로 metrics 갱신
+  // 지표 재계산: 재계산 후 자동으로 metrics 갱신
   async function recomputeMetrics() {
     setBusyRecompute(true);
     setErr("");

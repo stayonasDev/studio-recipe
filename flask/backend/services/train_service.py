@@ -24,7 +24,7 @@ def _run_train():
         from backend.ml.train_bpr import train_bpr
         train_bpr()
 
-        # ✅ 학습이 끝나면 추천 캐시를 반드시 날린다 (즉시 반영)
+        # 학습이 끝나면 추천 캐시를 반드시 날린다 (즉시 반영)
         try:
             from backend.services.recommender_mmr import invalidate_recipe_cache, warmup_recipe_cache
             invalidate_recipe_cache()

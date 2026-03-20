@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, current_app
 from backend.services.recommender_mmr import recommend_mmr
 
-# ✅ 기존 서비스에 이미 popular fallback 로직이 있다면 그걸 사용
+# 기존 서비스에 이미 popular fallback 로직이 있다면 그걸 사용
 try:
     from backend.services.recommender_cf import recommend_for_user as recommend_fallback
 except Exception:

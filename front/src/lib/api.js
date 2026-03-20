@@ -51,7 +51,7 @@ async function request(path, options = {}, { withAuth, usePrefix = true } = { wi
     headers.set("Authorization", `Bearer ${token}`);
   }
 
-  // ✅ Flask calls don't need the /studio-recipe prefix
+  // /studio-recipe prefix
   const url = usePrefix ? `${BASE_PREFIX}${path}` : path;
 
   const res = await fetch(url, {
@@ -60,7 +60,7 @@ async function request(path, options = {}, { withAuth, usePrefix = true } = { wi
     headers,
   });
 
-  // ✅ 401 처리: 토큰 삭제 + 전역 이벤트 (App에서 잡아서 로그인으로 보냄)
+  // 401 처리: 토큰 삭제 + 전역 이벤트 (App에서 잡아서 로그인으로 보냄)
   if (res.status === 401) {
     clearTokens();
     window.dispatchEvent(new CustomEvent("auth:logout", { detail: { reason: "expired" } }));
@@ -95,12 +95,12 @@ export async function apiFetch(path, options = {}) {
 }
 
 export async function springApiFetch(path, options = {}) {
-  // ✅ Spring Boot API calls - vite proxy already handles /studio-recipe routing
+  // Spring Boot API calls - vite proxy already handles /studio-recipe routing
   return request(path, options, { withAuth: true, usePrefix: false });
 }
 
 export async function publicFetch(path, options = {}) {
-  // ✅ Flask API calls (like /api/recommend) don't need Spring prefix
+  // Flask API calls (like /api/recommend) don't need Spring prefix
   const isFlaskCall = path.startsWith('/api/');
   return request(path, options, { withAuth: false, usePrefix: !isFlaskCall });
 }

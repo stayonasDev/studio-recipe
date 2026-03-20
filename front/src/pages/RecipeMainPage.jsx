@@ -7,7 +7,7 @@ function getId(r) {
   return r?.rcpSno ?? r?.recipeId ?? r?.id;
 }
 function getTitle(r) {
-  return r?.rcpTtl ?? r?.title ?? r?.name ?? "제목 없음"; // ✅ Flask: name
+  return r?.rcpTtl ?? r?.title ?? r?.name ?? "제목 없음"; // Flask: name
 }
 function getImg(r) {
   return r?.rcpImgUrl ?? r?.imgUrl ?? r?.imageUrl ?? r?.img ?? ""; // ✅ Flask: img
@@ -75,7 +75,7 @@ export default function RecipeMainPage({ onGoDetail, onGoAdmin, onLogout, onGoLo
       const params = new URLSearchParams({ k: "10", lambda: "0.8" });
       if (nextSeedId != null) params.set("seedRecipeId", String(nextSeedId));
 
-      // ✅ Flask 추천 서비스 직접 호출 (no auth required)
+      // Flask 추천 서비스 직접 호출 (no auth required)
       const data = await publicFetch(`/api/recommend?${params.toString()}`);
 
       setFlaskRecs(Array.isArray(data?.data) ? data.data : []);
@@ -88,7 +88,7 @@ export default function RecipeMainPage({ onGoDetail, onGoAdmin, onLogout, onGoLo
   }
 
   async function loadSpringRecommendations(nextSeedId = null) {
-    // ✅ 로그인하지 않은 경우 Spring Boot 추천 호출하지 않음
+    // 로그인하지 않은 경우 Spring Boot 추천 호출하지 않음
     const token = getAccessToken();
     if (!token) {
       console.log("Spring Boot 추천: 토큰이 없어 호출하지 않음");
@@ -106,7 +106,7 @@ export default function RecipeMainPage({ onGoDetail, onGoAdmin, onLogout, onGoLo
       console.log("Spring Boot 추천 호출:", `/recommend-recipes?${params.toString()}`);
       console.log("사용 토큰:", token ? "있음" : "없음");
 
-      // ✅ Spring Boot 추천 서비스 호출 - 올바른 엔드포인트 사용
+      // Spring Boot 추천 서비스 호출 - 올바른 엔드포인트 사용
       const data = await apiFetch(`/recommend-recipes?${params.toString()}`);
 
       console.log("Spring Boot 추천 응답:", data);
@@ -166,7 +166,7 @@ export default function RecipeMainPage({ onGoDetail, onGoAdmin, onLogout, onGoLo
     if (!recipeId) return;
     setSeedRecipeId(recipeId);
 
-    // ✅ 화면 흔들림 방지 핵심:
+    // 화면 흔들림 방지 핵심:
     // - 추천은 "카드 클릭(상세 이동)"에서만 갱신
     loadFlaskRecommendations(recipeId);
     loadSpringRecommendations(recipeId);
@@ -209,7 +209,7 @@ export default function RecipeMainPage({ onGoDetail, onGoAdmin, onLogout, onGoLo
         await apiFetch(`/likes/${id}`, { method: "DELETE" });
       }
 
-      // ✅ 좋아요 누르면 추천을 즉시 바꾸고 싶다면 여기서 seed 기반으로 갱신
+      // 좋아요 누르면 추천을 즉시 바꾸고 싶다면 여기서 seed 기반으로 갱신
       // (단, 흔들림이 싫으면 주석 처리)
       // loadFlaskRecommendations(id);
       // loadSpringRecommendations(id);
@@ -224,7 +224,7 @@ export default function RecipeMainPage({ onGoDetail, onGoAdmin, onLogout, onGoLo
       });
 
       const msg = String(err?.message || "");
-      // ✅ “이미 좋아요”가 오면 UX상: 자동으로 취소로 처리(원하면 유지)
+      // “이미 좋아요”가 오면 UX상: 자동으로 취소로 처리(원하면 유지)
       if (msg.includes("이미 좋아요")) {
         try {
           await apiFetch(`/likes/${id}`, { method: "DELETE" });
@@ -248,7 +248,7 @@ export default function RecipeMainPage({ onGoDetail, onGoAdmin, onLogout, onGoLo
     const id = getId(recipe);
     if (!id) return;
 
-    // ✅ 스크랩 API가 없다면 UI만 토글
+    // 스크랩 API가 없다면 UI만 토글
     setScrapState((prev) => {
       const s = new Set(prev);
       if (s.has(id)) s.delete(id);

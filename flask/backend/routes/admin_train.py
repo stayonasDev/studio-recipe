@@ -6,7 +6,7 @@ bp = Blueprint("admin_train", __name__)
 @bp.post("/api/admin/train-bpr")
 def start_train():
     """
-    ✅ 실제 학습은 train_service에서 수행
+    실제 학습은 train_service에서 수행
     - 중복 실행 방지
     """
     started = start_train_job()

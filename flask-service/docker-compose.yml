@@ -1,0 +1,19 @@
+services:
+  redis:
+    image: redis:6-alpine
+    container_name: recipe-redis
+    ports:
+      - "5713:5713"
+
+  flask:
+    build: .
+    container_name: recipe-flask
+    depends_on:
+      - redis
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: 0
+      CSV_FILE: recipe_data_241226.csv
+    ports:
+      - "5001:5001"

@@ -39,9 +39,9 @@ def parse_datetime_yyyyMMdd(raw: str) -> datetime:
 def run():
     app = create_app()
     with app.app_context():
-        print(f"📂 CSV 파일 경로: {CSV_PATH}")
+        print(f"CSV 파일 경로: {CSV_PATH}")
         if not CSV_PATH.exists():
-            print("❌ CSV 파일을 찾을 수 없습니다.")
+            print("CSV 파일을 찾을 수 없습니다.")
             return
 
         with open(CSV_PATH, newline="", encoding="utf-8") as f:
@@ -75,13 +75,13 @@ def run():
                 if len(batch) >= batch_size:
                     db.session.add_all(batch)
                     db.session.commit()
-                    print(f"✅ 현재까지 {total}개 레코드 저장 완료")
+                    print(f"현재까지 {total}개 레코드 저장 완료")
                     batch.clear()
 
             if batch:
                 db.session.add_all(batch)
                 db.session.commit()
-                print(f"✅ 최종 {total}개 레코드 저장 완료")
+                print(f"최종 {total}개 레코드 저장 완료")
 
 
 if __name__ == "__main__":

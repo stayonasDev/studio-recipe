@@ -32,7 +32,7 @@ services:
   backend:
     build:
       context: . #Dokcerifle 경로
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile`
     container_name: studio-recipe
     ports:
       - "8080:8080"

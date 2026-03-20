@@ -75,7 +75,7 @@ def load_interactions_and_items():
     """
     engine = create_engine(SQLALCHEMY_DATABASE_URI)
 
-    # (1) 전체 레시피(아이템 우주)  ✅ ORDER BY로 순서 고정
+    # (1) 전체 레시피(아이템 우주)  ORDER BY로 순서 고정
     items_sql = """
         SELECT RCP_SNO AS item_id
         FROM recipes
@@ -86,7 +86,7 @@ def load_interactions_and_items():
         raise RuntimeError("recipes 테이블에 레시피가 없습니다. 먼저 CSV 적재를 확인하세요.")
     all_item_ids = all_items_df["item_id"].astype(int).tolist()
 
-    # (2) 인터랙션  ✅ ORDER BY로 순서 고정(동일 데이터면 df 순서도 동일)
+    # (2) 인터랙션  ORDER BY로 순서 고정(동일 데이터면 df 순서도 동일)
     inter_sql = """
         SELECT
             USER_ID AS user_id,
@@ -111,7 +111,7 @@ def load_interactions_and_items():
     if after == 0:
         raise RuntimeError("USER_REFERENCES의 item_id가 recipes에 존재하지 않습니다. FK/데이터를 확인하세요.")
     if after != before:
-        print(f"⚠️ recipes에 없는 item_id {before-after}건을 학습에서 제외했습니다.")
+        print(f"recipes에 없는 item_id {before-after}건을 학습에서 제외했습니다.")
 
     # weight (원하면 LIKE 가중치 강화 가능)
     df["weight"] = df["PREFERENCE_TYPE"].apply(lambda t: 2 if t == "LIKE" else 1)
@@ -123,7 +123,7 @@ def load_interactions_and_items():
 # 3. ID → index 매핑 생성
 # ==============================
 def build_id_mappings(df: pd.DataFrame, all_item_ids: List[int]):
-    # ✅ user_id / item_id 순서 고정(정렬)
+    # user_id / item_id 순서 고정(정렬)
     unique_users = sorted(df["user_id"].unique().tolist())
     all_item_ids = sorted([int(x) for x in all_item_ids])
 
@@ -165,7 +165,7 @@ class BPRDataset(Dataset):
 
         self.num_items = len(item2idx)
 
-        # ✅ 유저별 negative 후보를 미리 만들어 무한루프 방지
+        # 유저별 negative 후보를 미리 만들어 무한루프 방지
         self.user_neg_candidates: Dict[int, List[int]] = {}
         all_items = set(range(self.num_items))
         for u_idx, pos_set in self.user_pos_items.items():
@@ -232,17 +232,17 @@ class BPRModel(nn.Module):
 # 6. 학습
 # ==============================
 def train_bpr():
-    # ✅ 학습 시작할 때도 seed 고정(스레드 호출 시에도 재현성 유지)
+    # 학습 시작할 때도 seed 고정(스레드 호출 시에도 재현성 유지)
     _seed_everything(SEED)
 
     df, all_item_ids, engine = load_interactions_and_items()
-    print(f"✅ USER_REFERENCES 로드 완료: {len(df)} rows")
-    print(f"✅ recipes(아이템 우주) 크기: {len(all_item_ids)}")
+    print(f"USER_REFERENCES 로드 완료: {len(df)} rows")
+    print(f"recipes(아이템 우주) 크기: {len(all_item_ids)}")
 
     user2idx, item2idx, idx2user, idx2item = build_id_mappings(df, all_item_ids)
     num_users = len(user2idx)
     num_items = len(item2idx)
-    print(f"✅ 유저 수: {num_users}, 레시피 수(우주): {num_items}")
+    print(f"유저 수: {num_users}, 레시피 수(우주): {num_items}")
 
     dataset = BPRDataset(
         df[["user_id", "item_id", "weight"]],
@@ -251,7 +251,7 @@ def train_bpr():
         negative_ratio=NEGATIVE_RATIO,
     )
 
-    # ✅ DataLoader도 결정적으로(셔플은 하되 generator 고정)
+    # DataLoader도 결정적으로(셔플은 하되 generator 고정)
     g = torch.Generator()
     g.manual_seed(SEED)
     dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True, generator=g)
@@ -277,7 +277,7 @@ def train_bpr():
         avg_loss = total_loss / max(1, len(dataloader))
         print(f"[Epoch {epoch}/{N_EPOCHS}] loss = {avg_loss:.4f}")
 
-    print("✅ 학습 완료")
+    print("학습 완료")
 
     user_emb = model.user_embed.weight.detach().cpu().numpy()
     item_emb = model.item_embed.weight.detach().cpu().numpy()

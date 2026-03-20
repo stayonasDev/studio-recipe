@@ -7,7 +7,7 @@ from typing import List, Optional, Set, Tuple
 from backend.extensions import db
 
 # =========================
-# ✅ 글로벌 캐시
+# 글로벌 캐시
 # =========================
 _CACHE_LOCK = RLock()
 _RECIPE_IDS = None           # np.array of ids

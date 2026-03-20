@@ -1,1 +1,9 @@
 .idea/
+__pycache__/
+*.pyc
+.venv/
+flask/backend/.env
+__pychace__/
+*.pyc
+.venv/
+flask/backend.env

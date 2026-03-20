@@ -16,7 +16,7 @@ export default function LoginPage({ onLoginSuccess, onGoRegister }) {
     try {
       const tokenResponse = await publicFetch("/auth/login", {
         method: "POST",
-        body: { id, password }, // ✅ UserLoginRequestDTO
+        body: { id, password }, // UserLoginRequestDTO
       });
 
       saveTokens(tokenResponse);
